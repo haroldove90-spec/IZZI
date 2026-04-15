@@ -11,7 +11,7 @@ export const IZZI_COLORS = {
 };
 
 export const IZZI_LOGO = "https://images.ctfassets.net/lx4ov5kud2ld/23qMcsoXhVZIeBO6VhFUNQ/c92a4b148c72923e33f67f9244414b45/izzi-logo-izzi-black.svg";
-export const IZZI_ICON = "https://appdesignproyectos.com/neo.png";
+export const IZZI_ICON = IZZI_LOGO;
 
 export const INITIAL_PROMOTIONS: Promotion[] = [
   {

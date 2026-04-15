@@ -15,6 +15,6 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-white text-dark antialiased;
+    @apply bg-white text-dark antialiased overflow-x-hidden;
   }
 }

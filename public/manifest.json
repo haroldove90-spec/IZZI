@@ -7,9 +7,10 @@
   "theme_color": "#047E29",
   "icons": [
     {
-      "src": "https://appdesignproyectos.com/neo.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "https://images.ctfassets.net/lx4ov5kud2ld/23qMcsoXhVZIeBO6VhFUNQ/c92a4b148c72923e33f67f9244414b45/izzi-logo-izzi-black.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
