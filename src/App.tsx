@@ -6,24 +6,34 @@ import {
   Plus, Trash2, Edit2, Save, CheckCircle2,
   ChevronRight, Info, Smartphone, Download,
   FileText, Table as TableIcon, Loader2, Image as ImageIcon,
-  User, Lock, Search, Filter
+  User, Lock, Search, Filter, Settings, Globe, Eye, EyeOff
 } from 'lucide-react';
-import { Promotion, UserRole, Category } from './types';
-import { INITIAL_PROMOTIONS, IZZI_COLORS, IZZI_LOGO, IZZI_ICON } from './constants';
+import { Promotion, UserRole, Category, AppConfig, HeroSlide } from './types';
+import { INITIAL_PROMOTIONS, IZZI_COLORS, IZZI_LOGO, IZZI_ICON, DEFAULT_CONFIG } from './constants';
 import { cn } from './lib/utils';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
 // --- Persistence Layer (localStorage) ---
-const STORAGE_KEY = 'izzi_promotions';
+const PROMOS_KEY = 'izzi_promotions';
+const CONFIG_KEY = 'izzi_config';
 
 const getStoredPromos = (): Promotion[] => {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(PROMOS_KEY);
   return stored ? JSON.parse(stored) : INITIAL_PROMOTIONS;
 };
 
+const getStoredConfig = (): AppConfig => {
+  const stored = localStorage.getItem(CONFIG_KEY);
+  return stored ? JSON.parse(stored) : DEFAULT_CONFIG;
+};
+
 const saveStoredPromos = (promos: Promotion[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(promos));
+  localStorage.setItem(PROMOS_KEY, JSON.stringify(promos));
+};
+
+const saveStoredConfig = (config: AppConfig) => {
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
 };
 
 // --- Components ---
@@ -126,20 +136,20 @@ const Header = ({ role, onLogout, onLoginClick }: { role: UserRole | null, onLog
   );
 };
 
-const Hero = ({ featuredPromos }: { featuredPromos: Promotion[] }) => {
+const HeroSlider = ({ slides }: { slides: HeroSlide[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    if (featuredPromos.length <= 1) return;
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % featuredPromos.length);
+      setCurrentIndex(prev => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [featuredPromos]);
+  }, [slides]);
 
-  if (featuredPromos.length === 0) return null;
+  if (slides.length === 0) return null;
 
-  const current = featuredPromos[currentIndex];
+  const current = slides[currentIndex];
 
   return (
     <section className="relative h-[600px] md:h-[700px] bg-dark overflow-hidden">
@@ -153,8 +163,8 @@ const Hero = ({ featuredPromos }: { featuredPromos: Promotion[] }) => {
           className="absolute inset-0"
         >
           <img 
-            src={current.imagen_url} 
-            alt={current.titulo} 
+            src={current.image_url} 
+            alt={current.title} 
             className="w-full h-full object-cover opacity-50 scale-105"
             referrerPolicy="no-referrer"
           />
@@ -172,34 +182,28 @@ const Hero = ({ featuredPromos }: { featuredPromos: Promotion[] }) => {
         >
           <div className="flex items-center gap-3 mb-8">
             <span className="bg-primary text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
-              {current.categoria}
+              OFERTA DEL MES
             </span>
             <div className="h-[1px] w-12 bg-white/20" />
-            <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">Oferta Exclusiva</span>
+            <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">Exclusivo Web</span>
           </div>
           <h1 className="text-6xl md:text-8xl font-black text-white leading-[0.9] mb-8 tracking-tighter">
-            {current.titulo.split(' ').map((word, i) => (
+            {current.title.split(' ').map((word, i) => (
               <span key={i} className={i % 2 !== 0 ? "text-secondary" : ""}>{word} </span>
             ))}
           </h1>
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-10">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold uppercase text-white/40 tracking-widest mb-1">Precio Mensual</span>
-              <div className="flex items-start">
-                <span className="text-2xl font-bold text-white mt-1">$</span>
-                <span className="text-6xl font-black text-white">{current.precio}</span>
-              </div>
-            </div>
-            <button className="bg-white text-dark px-10 py-5 rounded-3xl font-black text-lg hover:bg-primary hover:text-white transition-all flex items-center gap-3 group shadow-2xl">
-              CONTRATAR AHORA <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-            </button>
-          </div>
+          <p className="text-xl text-white/60 mb-10 font-medium max-w-xl leading-relaxed">
+            {current.subtitle}
+          </p>
+          <button className="bg-white text-dark px-10 py-5 rounded-3xl font-black text-lg hover:bg-primary hover:text-white transition-all flex items-center gap-3 group shadow-2xl">
+            CONTRATAR AHORA <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+          </button>
         </motion.div>
       </div>
 
       <div className="absolute bottom-12 left-6 right-6 container mx-auto flex justify-between items-center z-20">
         <div className="flex gap-3">
-          {featuredPromos.map((_, idx) => (
+          {slides.map((_, idx) => (
             <button 
               key={idx}
               onClick={() => setCurrentIndex(idx)}
@@ -213,16 +217,16 @@ const Hero = ({ featuredPromos }: { featuredPromos: Promotion[] }) => {
         <div className="hidden md:flex items-center gap-4 text-white/40 text-[10px] font-bold uppercase tracking-widest">
           <span>0{currentIndex + 1}</span>
           <div className="w-10 h-[1px] bg-white/10" />
-          <span>0{featuredPromos.length}</span>
+          <span>0{slides.length}</span>
         </div>
       </div>
     </section>
   );
 };
 
-const PromoCard: React.FC<{ promo: Promotion }> = ({ promo }) => {
-  const whatsappMsg = `Hola, me interesa la promoción de ${promo.titulo} que vi en la página.`;
-  const whatsappUrl = `https://wa.me/521234567890?text=${encodeURIComponent(whatsappMsg)}`;
+const PromoCard: React.FC<{ promo: Promotion, salesPhone: string }> = ({ promo, salesPhone }) => {
+  const whatsappMsg = `Hola, me interesa contratar el paquete ${promo.titulo} de ${promo.megas} Megas por $${promo.precio} que vi en su página web. ¿Me podrían dar más información?`;
+  const whatsappUrl = `https://wa.me/${salesPhone}?text=${encodeURIComponent(whatsappMsg)}`;
 
   return (
     <motion.div 
@@ -275,16 +279,23 @@ const PromoCard: React.FC<{ promo: Promotion }> = ({ promo }) => {
           rel="noopener noreferrer"
           className="w-full bg-dark text-white py-5 rounded-3xl font-black text-sm hover:bg-primary transition-all flex items-center justify-center gap-3 shadow-xl shadow-dark/10"
         >
-          <MessageCircle size={18} /> CONTRATAR
+          <MessageCircle size={18} /> CONTRATAR AHORA
         </a>
       </div>
     </motion.div>
   );
 }
 
-const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos: React.Dispatch<React.SetStateAction<Promotion[]>> }) => {
+const AdminDashboard = ({ 
+  promos, setPromos, 
+  config, setConfig 
+}: { 
+  promos: Promotion[], setPromos: React.Dispatch<React.SetStateAction<Promotion[]>>,
+  config: AppConfig, setConfig: React.Dispatch<React.SetStateAction<AppConfig>>
+}) => {
+  const [activeTab, setActiveTab] = useState<'promos' | 'slider' | 'config'>('promos');
   const [isEditing, setIsEditing] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Promotion>>({});
+  const [formData, setFormData] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
 
@@ -293,7 +304,7 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
     setTimeout(() => setFeedback(null), 3000);
   };
 
-  const handleSave = () => {
+  const handleSavePromo = () => {
     if (!formData.titulo || !formData.precio) {
       showFeedback('error', 'Título y precio son obligatorios');
       return;
@@ -328,7 +339,41 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
     }, 500);
   };
 
-  const handleDelete = (id: string) => {
+  const handleSaveSlide = () => {
+    if (!formData.title || !formData.image_url) {
+      showFeedback('error', 'Título e imagen son obligatorios');
+      return;
+    }
+
+    setIsLoading(true);
+    setTimeout(() => {
+      const newSlides = [...config.heroSlides];
+      const index = newSlides.findIndex(s => s.id === formData.id);
+      
+      if (index >= 0) {
+        newSlides[index] = formData as HeroSlide;
+      } else {
+        newSlides.push({ ...formData, id: Date.now().toString() });
+      }
+
+      const newConfig = { ...config, heroSlides: newSlides };
+      setConfig(newConfig);
+      saveStoredConfig(newConfig);
+      
+      setIsEditing(null);
+      setFormData({});
+      setIsLoading(false);
+      showFeedback('success', 'Slide guardado correctamente');
+    }, 500);
+  };
+
+  const handleSaveConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveStoredConfig(config);
+    showFeedback('success', 'Configuración global actualizada');
+  };
+
+  const handleDeletePromo = (id: string) => {
     if (!confirm('¿Eliminar esta promoción?')) return;
     const updated = promos.filter(p => p.id !== id);
     setPromos(updated);
@@ -336,10 +381,19 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
     showFeedback('success', 'Eliminado correctamente');
   };
 
+  const handleDeleteSlide = (id: string) => {
+    if (!confirm('¿Eliminar este slide?')) return;
+    const newSlides = config.heroSlides.filter(s => s.id !== id);
+    const newConfig = { ...config, heroSlides: newSlides };
+    setConfig(newConfig);
+    saveStoredConfig(newConfig);
+    showFeedback('success', 'Slide eliminado');
+  };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(22);
-    doc.setTextColor(4, 126, 41); // Primary Green
+    doc.setTextColor(4, 126, 41);
     doc.text('izzi | Reporte de Promociones', 20, 30);
     doc.setFontSize(12);
     doc.setTextColor(40, 40, 41);
@@ -376,23 +430,40 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
       <div className="container mx-auto px-6">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16">
           <div>
-            <h1 className="text-4xl font-black text-dark mb-2 tracking-tight">Gestión de Contenido</h1>
-            <p className="text-dark/40 font-medium">Administra las ofertas y banners de la landing page.</p>
+            <h1 className="text-4xl font-black text-dark mb-2 tracking-tight">CMS izzi</h1>
+            <p className="text-dark/40 font-medium">Gestión total de contenidos y configuración.</p>
           </div>
           
           <div className="flex flex-wrap gap-4">
-            <button onClick={exportToPDF} className="bg-white border border-gray-100 text-dark/60 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
-              <FileText size={18} /> PDF
-            </button>
-            <button onClick={exportToExcel} className="bg-white border border-gray-100 text-dark/60 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
-              <TableIcon size={18} /> Excel
-            </button>
-            <button 
-              onClick={() => { setIsEditing('new'); setFormData({ categoria: 'Internet', destacado: false }); }}
-              className="bg-primary text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20"
-            >
-              <Plus size={20} /> NUEVA PROMO
-            </button>
+            <div className="bg-white p-2 rounded-3xl shadow-sm border border-gray-100 flex gap-2">
+              <button 
+                onClick={() => setActiveTab('promos')}
+                className={cn(
+                  "px-6 py-3 rounded-2xl font-bold text-xs transition-all",
+                  activeTab === 'promos' ? "bg-primary text-white" : "text-dark/40 hover:bg-gray-50"
+                )}
+              >
+                Promociones
+              </button>
+              <button 
+                onClick={() => setActiveTab('slider')}
+                className={cn(
+                  "px-6 py-3 rounded-2xl font-bold text-xs transition-all",
+                  activeTab === 'slider' ? "bg-primary text-white" : "text-dark/40 hover:bg-gray-50"
+                )}
+              >
+                Hero Slider
+              </button>
+              <button 
+                onClick={() => setActiveTab('config')}
+                className={cn(
+                  "px-6 py-3 rounded-2xl font-bold text-xs transition-all",
+                  activeTab === 'config' ? "bg-primary text-white" : "text-dark/40 hover:bg-gray-50"
+                )}
+              >
+                Global
+              </button>
+            </div>
           </div>
         </div>
 
@@ -413,6 +484,142 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
           )}
         </AnimatePresence>
 
+        {activeTab === 'promos' && (
+          <div className="space-y-12">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-black text-dark">Listado de Paquetes</h2>
+              <div className="flex gap-4">
+                <button onClick={exportToPDF} className="bg-white border border-gray-100 text-dark/60 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
+                  <FileText size={18} /> PDF
+                </button>
+                <button onClick={exportToExcel} className="bg-white border border-gray-100 text-dark/60 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
+                  <TableIcon size={18} /> Excel
+                </button>
+                <button 
+                  onClick={() => { setIsEditing('new_promo'); setFormData({ categoria: 'Internet', destacado: false }); }}
+                  className="bg-primary text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20"
+                >
+                  <Plus size={20} /> NUEVA PROMO
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {promos.map(promo => (
+                <div key={promo.id} className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                        {promo.categoria === 'Internet' ? <Wifi size={24} /> : promo.categoria === 'Combo' ? <Tv size={24} /> : <Smartphone size={24} />}
+                      </div>
+                      <div>
+                        <h3 className="font-black text-dark tracking-tight">{promo.titulo}</h3>
+                        <span className="text-[10px] font-bold text-dark/30 uppercase tracking-widest">{promo.categoria}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-1 mb-8">
+                    <div className="relative h-40 rounded-3xl overflow-hidden mb-6">
+                      <img src={promo.imagen_url} alt={promo.titulo} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex justify-between items-end px-2">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-dark/30 uppercase tracking-widest">Precio</span>
+                        <span className="text-3xl font-black text-dark">${promo.precio}</span>
+                      </div>
+                      <div className="text-right flex flex-col">
+                        <span className="text-[10px] font-bold text-dark/30 uppercase tracking-widest">Velocidad</span>
+                        <span className="text-xl font-bold text-primary">{promo.megas} Megas</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => { setIsEditing('edit_promo'); setFormData(promo); }}
+                      className="flex-1 bg-gray-50 text-dark py-4 rounded-2xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Edit2 size={16} /> Editar
+                    </button>
+                    <button 
+                      onClick={() => handleDeletePromo(promo.id)}
+                      className="p-4 bg-accent/5 text-accent rounded-2xl hover:bg-accent hover:text-white transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'slider' && (
+          <div className="space-y-12">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-black text-dark">Diapositivas del Hero</h2>
+              <button 
+                onClick={() => { setIsEditing('new_slide'); setFormData({}); }}
+                className="bg-primary text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20"
+              >
+                <Plus size={20} /> NUEVO SLIDE
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {config.heroSlides.map(slide => (
+                <div key={slide.id} className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
+                  <div className="relative h-48 rounded-3xl overflow-hidden mb-6">
+                    <img src={slide.image_url} alt={slide.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-dark/40 p-6 flex flex-col justify-end">
+                      <h3 className="text-white font-black text-xl leading-tight">{slide.title}</h3>
+                    </div>
+                  </div>
+                  <p className="text-dark/40 text-sm font-medium mb-8 line-clamp-2 flex-1">{slide.subtitle}</p>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => { setIsEditing('edit_slide'); setFormData(slide); }}
+                      className="flex-1 bg-gray-50 text-dark py-4 rounded-2xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Edit2 size={16} /> Editar
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteSlide(slide.id)}
+                      className="p-4 bg-accent/5 text-accent rounded-2xl hover:bg-accent hover:text-white transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'config' && (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-[48px] p-12 shadow-sm border border-gray-50">
+              <h2 className="text-2xl font-black text-dark mb-10">Configuración Global</h2>
+              <form onSubmit={handleSaveConfig} className="space-y-8">
+                <div>
+                  <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">WhatsApp de Ventas (Sin +)</label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value={config.salesPhone} 
+                      onChange={e => setConfig({...config, salesPhone: e.target.value})}
+                      className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-14 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                      placeholder="526635097802"
+                    />
+                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-dark/20" size={20} />
+                  </div>
+                  <p className="text-[10px] text-dark/30 mt-2 ml-2">Este número recibirá todos los pedidos de la landing.</p>
+                </div>
+                <button className="w-full bg-dark text-white py-5 rounded-3xl font-black text-lg hover:bg-primary transition-all shadow-xl shadow-dark/10">
+                  GUARDAR CONFIGURACIÓN
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
         <AnimatePresence>
           {isEditing && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-dark/40 backdrop-blur-xl p-6">
@@ -423,109 +630,119 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
               >
                 <div className="flex justify-between items-center mb-12">
                   <h2 className="text-3xl font-black text-dark tracking-tight">
-                    {isEditing === 'new' ? 'Nueva Promoción' : 'Editar Promoción'}
+                    {isEditing.includes('promo') ? (isEditing.includes('new') ? 'Nueva Promoción' : 'Editar Promoción') : (isEditing.includes('new') ? 'Nuevo Slide' : 'Editar Slide')}
                   </h2>
                   <button onClick={() => setIsEditing(null)} className="p-3 hover:bg-gray-50 rounded-2xl transition-colors">
                     <X size={24} />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  <div className="space-y-8">
-                    <div>
-                      <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Título de la Oferta</label>
-                      <input 
-                        type="text" 
-                        value={formData.titulo || ''} 
-                        onChange={e => setFormData({...formData, titulo: e.target.value})}
-                        className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-                        placeholder="Ej: izzi 100 Megas"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-6">
+                {isEditing.includes('promo') ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-8">
                       <div>
-                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Megas</label>
+                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Título de la Oferta</label>
                         <input 
                           type="text" 
-                          value={formData.megas || ''} 
-                          onChange={e => setFormData({...formData, megas: e.target.value})}
+                          value={formData.titulo || ''} 
+                          onChange={e => setFormData({...formData, titulo: e.target.value})}
                           className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-                          placeholder="100"
                         />
+                      </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Megas</label>
+                          <input 
+                            type="text" 
+                            value={formData.megas || ''} 
+                            onChange={e => setFormData({...formData, megas: e.target.value})}
+                            className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Precio ($)</label>
+                          <input 
+                            type="number" 
+                            value={formData.precio || ''} 
+                            onChange={e => setFormData({...formData, precio: Number(e.target.value)})}
+                            className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                          />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Precio ($)</label>
-                        <input 
-                          type="number" 
-                          value={formData.precio || ''} 
-                          onChange={e => setFormData({...formData, precio: Number(e.target.value)})}
-                          className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-                          placeholder="450"
-                        />
+                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Categoría</label>
+                        <div className="flex gap-3">
+                          {(['Internet', 'Combo', 'Móvil'] as Category[]).map(cat => (
+                            <button
+                              key={cat}
+                              onClick={() => setFormData({...formData, categoria: cat})}
+                              className={cn(
+                                "flex-1 py-4 rounded-2xl font-bold text-xs transition-all",
+                                formData.categoria === cat ? "bg-primary text-white" : "bg-gray-50 text-dark/40"
+                              )}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Categoría</label>
-                      <div className="flex gap-3">
-                        {(['Internet', 'Combo', 'Móvil'] as Category[]).map(cat => (
-                          <button
-                            key={cat}
-                            onClick={() => setFormData({...formData, categoria: cat})}
-                            className={cn(
-                              "flex-1 py-4 rounded-2xl font-bold text-xs transition-all",
-                              formData.categoria === cat ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gray-50 text-dark/40 hover:bg-gray-100"
-                            )}
-                          >
-                            {cat}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-8">
-                    <div>
-                      <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">URL del Banner</label>
-                      <div className="relative">
+                    <div className="space-y-8">
+                      <div>
+                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">URL de Imagen</label>
                         <input 
                           type="text" 
                           value={formData.imagen_url || ''} 
                           onChange={e => setFormData({...formData, imagen_url: e.target.value})}
-                          className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-14 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-                          placeholder="https://..."
+                          className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                         />
-                        <ImageIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-dark/20" size={20} />
                       </div>
+                      {formData.imagen_url && (
+                        <img src={formData.imagen_url} className="rounded-3xl h-40 w-full object-cover" alt="Preview" />
+                      )}
                     </div>
-                    <div className="p-6 bg-gray-50 rounded-3xl flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-dark">Destacar en Hero</span>
-                        <span className="text-[10px] text-dark/40">Mostrar como banner principal</span>
-                      </div>
-                      <button 
-                        onClick={() => setFormData({...formData, destacado: !formData.destacado})}
-                        className={cn(
-                          "w-14 h-8 rounded-full transition-all relative",
-                          formData.destacado ? "bg-primary" : "bg-gray-200"
-                        )}
-                      >
-                        <div className={cn(
-                          "absolute top-1 w-6 h-6 bg-white rounded-full transition-all shadow-sm",
-                          formData.destacado ? "left-7" : "left-1"
-                        )} />
-                      </button>
-                    </div>
-                    {formData.imagen_url && (
-                      <div className="rounded-3xl overflow-hidden h-40 border border-gray-100 shadow-inner">
-                        <img src={formData.imagen_url} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
                   </div>
-                </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-8">
+                      <div>
+                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Título del Slide</label>
+                        <input 
+                          type="text" 
+                          value={formData.title || ''} 
+                          onChange={e => setFormData({...formData, title: e.target.value})}
+                          className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">Descripción</label>
+                        <textarea 
+                          value={formData.subtitle || ''} 
+                          onChange={e => setFormData({...formData, subtitle: e.target.value})}
+                          className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium h-32 resize-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-8">
+                      <div>
+                        <label className="block text-[10px] font-black uppercase text-dark/30 mb-2 tracking-widest">URL de Fondo</label>
+                        <input 
+                          type="text" 
+                          value={formData.image_url || ''} 
+                          onChange={e => setFormData({...formData, image_url: e.target.value})}
+                          className="w-full bg-gray-50 border-none rounded-2xl p-5 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                        />
+                      </div>
+                      {formData.image_url && (
+                        <img src={formData.image_url} className="rounded-3xl h-40 w-full object-cover" alt="Preview" />
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-14 flex gap-4">
                   <button 
-                    onClick={handleSave}
+                    onClick={isEditing.includes('promo') ? handleSavePromo : handleSaveSlide}
                     disabled={isLoading}
                     className="flex-1 bg-dark text-white py-5 rounded-3xl font-black text-lg hover:bg-primary transition-all flex items-center justify-center gap-3 shadow-2xl shadow-dark/10"
                   >
@@ -537,61 +754,6 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
             </div>
           )}
         </AnimatePresence>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {promos.map(promo => (
-            <div key={promo.id} className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    {promo.categoria === 'Internet' ? <Wifi size={24} /> : promo.categoria === 'Combo' ? <Tv size={24} /> : <Smartphone size={24} />}
-                  </div>
-                  <div>
-                    <h3 className="font-black text-dark tracking-tight">{promo.titulo}</h3>
-                    <span className="text-[10px] font-bold text-dark/30 uppercase tracking-widest">{promo.categoria}</span>
-                  </div>
-                </div>
-                {promo.destacado && (
-                  <div className="bg-secondary/10 text-secondary p-2.5 rounded-xl" title="Destacado en Hero">
-                    <CheckCircle2 size={18} />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1 mb-8">
-                <div className="relative h-40 rounded-3xl overflow-hidden mb-6">
-                  <img src={promo.imagen_url} alt={promo.titulo} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="flex justify-between items-end px-2">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-dark/30 uppercase tracking-widest">Precio</span>
-                    <span className="text-3xl font-black text-dark">${promo.precio}</span>
-                  </div>
-                  <div className="text-right flex flex-col">
-                    <span className="text-[10px] font-bold text-dark/30 uppercase tracking-widest">Velocidad</span>
-                    <span className="text-xl font-bold text-primary">{promo.megas} Megas</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => { setIsEditing(promo.id); setFormData(promo); }}
-                  className="flex-1 bg-gray-50 text-dark py-4 rounded-2xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
-                >
-                  <Edit2 size={16} /> Editar
-                </button>
-                <button 
-                  onClick={() => handleDelete(promo.id)}
-                  className="p-4 bg-accent/5 text-accent rounded-2xl hover:bg-accent hover:text-white transition-all"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -600,6 +762,7 @@ const AdminDashboard = ({ promos, setPromos }: { promos: Promotion[], setPromos:
 const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -643,16 +806,23 @@ const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
             </div>
             <div className="relative">
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 placeholder="Contraseña" 
                 className={cn(
-                  "w-full bg-gray-50 border-2 rounded-2xl p-5 pl-14 outline-none transition-all font-medium",
+                  "w-full bg-gray-50 border-2 rounded-2xl p-5 pl-14 pr-14 outline-none transition-all font-medium",
                   error ? 'border-accent/20' : 'border-transparent focus:border-primary/20'
                 )}
                 value={pass}
                 onChange={e => { setPass(e.target.value); setError(false); }}
               />
               <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-dark/20" size={20} />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-dark/20 hover:text-primary transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {error && <p className="text-accent text-xs font-bold mt-2 ml-2">Credenciales incorrectas</p>}
           </div>
@@ -688,16 +858,17 @@ export default function App() {
   const [role, setRole] = useState<UserRole | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [promos, setPromos] = useState<Promotion[]>([]);
+  const [config, setConfig] = useState<AppConfig>(DEFAULT_CONFIG);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Load from localStorage
     const data = getStoredPromos();
+    const conf = getStoredConfig();
     setPromos(data);
+    setConfig(conf);
     setIsLoading(false);
   }, []);
-
-  const featuredPromos = promos.filter(p => p.destacado);
 
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-primary selection:text-white flex flex-col antialiased">
@@ -719,10 +890,13 @@ export default function App() {
             <Loader2 className="animate-spin text-primary" size={48} />
           </div>
         ) : role === 'admin' ? (
-          <AdminDashboard promos={promos} setPromos={setPromos} />
+          <AdminDashboard 
+            promos={promos} setPromos={setPromos} 
+            config={config} setConfig={setConfig} 
+          />
         ) : (
           <>
-            <Hero featuredPromos={featuredPromos.length > 0 ? featuredPromos : INITIAL_PROMOTIONS.filter(p => p.destacado)} />
+            <HeroSlider slides={config.heroSlides} />
             
             <section id="promos" className="py-32 container mx-auto px-6">
               <div className="flex flex-col lg:flex-row justify-between items-end mb-24 gap-10">
@@ -753,7 +927,7 @@ export default function App() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 {promos.map(promo => (
-                  <PromoCard key={promo.id} promo={promo} />
+                  <PromoCard key={promo.id} promo={promo} salesPhone={config.salesPhone} />
                 ))}
               </div>
             </section>
@@ -798,7 +972,7 @@ export default function App() {
 
       {/* Floating WhatsApp Button */}
       <a 
-        href="https://wa.me/521234567890?text=Hola%20izzi!%20Quiero%20información%20sobre%20sus%20paquetes." 
+        href={`https://wa.me/${config.salesPhone}?text=${encodeURIComponent('Hola izzi! Quiero información sobre sus paquetes.')}`} 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-10 right-10 z-50 bg-[#25D366] text-white p-6 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center group"

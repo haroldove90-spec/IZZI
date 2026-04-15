@@ -11,6 +11,18 @@ export interface Promotion {
   features?: string[];
 }
 
+export interface HeroSlide {
+  id: string;
+  image_url: string;
+  title: string;
+  subtitle: string;
+}
+
+export interface AppConfig {
+  salesPhone: string;
+  heroSlides: HeroSlide[];
+}
+
 export type UserRole = 'client' | 'admin';
 
 export interface User {
