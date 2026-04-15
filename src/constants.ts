@@ -1,38 +1,47 @@
 import { Promotion } from './types';
 
 export const IZZI_COLORS = {
-  magenta: '#E5007E',
-  black: '#000000',
+  primary: '#047E29',
+  secondary: '#CDCC34',
+  accent: '#FC0000',
+  light: '#EBFBCA',
+  text: '#282829',
   white: '#FFFFFF',
-  gray: '#F5F5F5',
+  gray: '#F4F4F4',
 };
+
+export const IZZI_LOGO = "https://images.ctfassets.net/lx4ov5kud2ld/23qMcsoXhVZIeBO6VhFUNQ/c92a4b148c72923e33f67f9244414b45/izzi-logo-izzi-black.svg";
+export const IZZI_ICON = "https://appdesignproyectos.com/neo.png";
 
 export const INITIAL_PROMOTIONS: Promotion[] = [
   {
     id: '1',
-    title: 'Internet + Telefonía',
-    megas: 50,
-    channels: 0,
-    price: 450,
-    isPopular: false,
-    features: ['Internet de alta velocidad', 'Llamadas ilimitadas', 'Instalación inmediata'],
+    titulo: 'izzi 100 Megas',
+    megas: '100',
+    precio: 450,
+    imagen_url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=1200',
+    destacado: true,
+    categoria: 'Internet',
+    features: ['Incluye izzi tv', 'Llamadas ilimitadas', 'Instalación inmediata']
   },
   {
     id: '2',
-    title: 'Combo Entretenimiento',
-    megas: 100,
-    channels: 60,
-    price: 650,
-    isPopular: true,
-    features: ['Internet 100 Megas', '60 Canales HD', 'izzi go incluido', 'Vix Premium'],
+    titulo: 'izzi 200 Megas + Disney+',
+    megas: '200',
+    precio: 650,
+    imagen_url: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&q=80&w=1200',
+    destacado: true,
+    categoria: 'Combo',
+    features: ['Disney+ incluido', 'izzi tv HD', '2 extensiones']
   },
   {
     id: '3',
-    title: 'Ultra Gamer',
-    megas: 500,
-    channels: 100,
-    price: 990,
-    isPopular: false,
-    features: ['Internet 500 Megas', '100 Canales HD', 'Extensor WiFi', 'Prioridad de red'],
-  },
+    titulo: 'izzi Móvil Ilimitado',
+    megas: 'Ilimitado',
+    precio: 250,
+    imagen_url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=1200',
+    destacado: false,
+    categoria: 'Móvil',
+    features: ['Red 4.5G', 'Roaming en USA/CAN', 'Sin plazos forzosos']
+  }
 ];

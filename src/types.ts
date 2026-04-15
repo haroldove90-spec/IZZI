@@ -1,11 +1,14 @@
+export type Category = 'Internet' | 'Combo' | 'Móvil';
+
 export interface Promotion {
   id: string;
-  title: string;
-  megas: number;
-  channels: number;
-  price: number;
-  isPopular?: boolean;
-  features: string[];
+  titulo: string;
+  megas: string | number;
+  precio: number;
+  imagen_url: string;
+  destacado: boolean;
+  categoria: Category;
+  features?: string[];
 }
 
 export type UserRole = 'client' | 'admin';

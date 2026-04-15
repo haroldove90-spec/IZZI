@@ -1,0 +1,15 @@
+{
+  "name": "izzi | Conéctate a tu mundo",
+  "short_name": "izzi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#047E29",
+  "icons": [
+    {
+      "src": "https://appdesignproyectos.com/neo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
