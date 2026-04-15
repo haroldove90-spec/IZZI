@@ -434,12 +434,12 @@ const AdminDashboard = ({
             <p className="text-dark/40 font-medium">Gestión total de contenidos y configuración.</p>
           </div>
           
-          <div className="flex flex-wrap gap-4">
-            <div className="bg-white p-2 rounded-3xl shadow-sm border border-gray-100 flex gap-2">
+          <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+            <div className="bg-white p-2 rounded-3xl shadow-sm border border-gray-100 flex flex-wrap gap-2 w-full sm:w-auto">
               <button 
                 onClick={() => setActiveTab('promos')}
                 className={cn(
-                  "px-6 py-3 rounded-2xl font-bold text-xs transition-all",
+                  "flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-2xl font-bold text-[10px] sm:text-xs transition-all",
                   activeTab === 'promos' ? "bg-primary text-white" : "text-dark/40 hover:bg-gray-50"
                 )}
               >
@@ -448,7 +448,7 @@ const AdminDashboard = ({
               <button 
                 onClick={() => setActiveTab('slider')}
                 className={cn(
-                  "px-6 py-3 rounded-2xl font-bold text-xs transition-all",
+                  "flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-2xl font-bold text-[10px] sm:text-xs transition-all",
                   activeTab === 'slider' ? "bg-primary text-white" : "text-dark/40 hover:bg-gray-50"
                 )}
               >
@@ -457,7 +457,7 @@ const AdminDashboard = ({
               <button 
                 onClick={() => setActiveTab('config')}
                 className={cn(
-                  "px-6 py-3 rounded-2xl font-bold text-xs transition-all",
+                  "flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-2xl font-bold text-[10px] sm:text-xs transition-all",
                   activeTab === 'config' ? "bg-primary text-white" : "text-dark/40 hover:bg-gray-50"
                 )}
               >
@@ -486,26 +486,26 @@ const AdminDashboard = ({
 
         {activeTab === 'promos' && (
           <div className="space-y-12">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <h2 className="text-2xl font-black text-dark">Listado de Paquetes</h2>
-              <div className="flex gap-4">
-                <button onClick={exportToPDF} className="bg-white border border-gray-100 text-dark/60 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
-                  <FileText size={18} /> PDF
+              <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+                <button onClick={exportToPDF} className="flex-1 sm:flex-none bg-white border border-gray-100 text-dark/60 px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all shadow-sm text-xs">
+                  <FileText size={16} /> PDF
                 </button>
-                <button onClick={exportToExcel} className="bg-white border border-gray-100 text-dark/60 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
-                  <TableIcon size={18} /> Excel
+                <button onClick={exportToExcel} className="flex-1 sm:flex-none bg-white border border-gray-100 text-dark/60 px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all shadow-sm text-xs">
+                  <TableIcon size={16} /> Excel
                 </button>
                 <button 
                   onClick={() => { setIsEditing('new_promo'); setFormData({ categoria: 'Internet', destacado: false }); }}
-                  className="bg-primary text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20"
+                  className="w-full sm:w-auto bg-primary text-white px-6 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20 text-xs"
                 >
-                  <Plus size={20} /> NUEVA PROMO
+                  <Plus size={18} /> NUEVA PROMO
                 </button>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {promos.map(promo => (
-                <div key={promo.id} className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
+                <div key={promo.id} className="bg-white rounded-[40px] p-6 sm:p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
@@ -554,18 +554,18 @@ const AdminDashboard = ({
 
         {activeTab === 'slider' && (
           <div className="space-y-12">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <h2 className="text-2xl font-black text-dark">Diapositivas del Hero</h2>
               <button 
                 onClick={() => { setIsEditing('new_slide'); setFormData({}); }}
-                className="bg-primary text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20"
+                className="w-full sm:w-auto bg-primary text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-dark transition-all shadow-xl shadow-primary/20 text-xs"
               >
-                <Plus size={20} /> NUEVO SLIDE
+                <Plus size={18} /> NUEVO SLIDE
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {config.heroSlides.map(slide => (
-                <div key={slide.id} className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
+                <div key={slide.id} className="bg-white rounded-[40px] p-6 sm:p-8 shadow-sm border border-gray-50 flex flex-col group hover:shadow-2xl hover:shadow-dark/5 transition-all duration-500">
                   <div className="relative h-48 rounded-3xl overflow-hidden mb-6">
                     <img src={slide.image_url} alt={slide.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-dark/40 p-6 flex flex-col justify-end">
@@ -622,13 +622,13 @@ const AdminDashboard = ({
 
         <AnimatePresence>
           {isEditing && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-dark/40 backdrop-blur-xl p-6">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-dark/40 backdrop-blur-xl p-4 sm:p-6">
               <motion.div 
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-white rounded-[48px] p-10 md:p-14 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-[40px] sm:rounded-[48px] p-6 sm:p-10 md:p-14 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
               >
-                <div className="flex justify-between items-center mb-12">
+                <div className="flex justify-between items-center mb-8 sm:mb-12">
                   <h2 className="text-3xl font-black text-dark tracking-tight">
                     {isEditing.includes('promo') ? (isEditing.includes('new') ? 'Nueva Promoción' : 'Editar Promoción') : (isEditing.includes('new') ? 'Nuevo Slide' : 'Editar Slide')}
                   </h2>
